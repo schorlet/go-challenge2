@@ -1,3 +1,4 @@
+// The April 2015 Go Challenge for developers
 // http://golang-challenge.org/go-challenge2/
 package main
 
@@ -23,7 +24,7 @@ type secureReader struct {
 	r, w      int
 }
 
-// NewSecureReader instantiates a new secure reader.
+// NewSecureReader creates a new secure reader.
 func NewSecureReader(r io.Reader, priv, pub *[32]byte) io.Reader {
 	return &secureReader{reader: r, priv: *priv, pub: *pub}
 }
@@ -98,7 +99,7 @@ type secureWriter struct {
 	priv, pub [32]byte
 }
 
-// NewSecureWriter instantiates a new secure writer.
+// NewSecureWriter creates a new secure writer.
 func NewSecureWriter(w io.Writer, priv, pub *[32]byte) io.Writer {
 	return &secureWriter{w, *priv, *pub}
 }
@@ -194,7 +195,7 @@ func (c *secureConn) Write(p []byte) (n int, err error) {
 }
 
 // Dial connects to the server, perform the handshake
-// and return a reader/writer.
+// and return a secured reader/writer.
 func Dial(addr string) (io.ReadWriteCloser, error) {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
