@@ -150,6 +150,8 @@ func TestSecureDial(t *testing.T) {
 	}
 	defer l.Close()
 
+	const expected = "hello world\n"
+
 	// Start the server
 	go func(l net.Listener) {
 		for {
@@ -159,14 +161,21 @@ func TestSecureDial(t *testing.T) {
 			}
 			go func(c net.Conn) {
 				defer c.Close()
+
+				// write pubic key
 				key := [32]byte{}
-				c.Write(key[:])
-				buf := make([]byte, 2048)
-				n, err := c.Read(buf)
+				_, err := c.Write(key[:])
 				if err != nil {
 					t.Fatal(err)
 				}
-				if got := string(buf[:n]); got == "hello world\n" {
+
+				msg, err := ioutil.ReadAll(c)
+				if err != nil {
+					t.Fatal(err)
+				}
+				start := len(msg) - len(expected)
+
+				if got := string(msg[start:]); got == expected {
 					t.Fatal("Unexpected result. Got raw data instead of encrypted")
 				}
 			}(conn)
@@ -179,7 +188,6 @@ func TestSecureDial(t *testing.T) {
 	}
 	defer conn.Close()
 
-	expected := "hello world\n"
 	if _, err := fmt.Fprintf(conn, expected); err != nil {
 		t.Fatal(err)
 	}
